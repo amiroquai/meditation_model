@@ -1,0 +1,247 @@
+define task SARTlaterTrans {
+	initial-goals: (prepare check-s-r missed)
+	goals: (Wander just-react)
+	task-constants: (stimulus check Memory reinforce prepare check-s-r pump imagine Wander just-press press done s-r-mapping r-mapping nopress mask)
+    imaginal-autoclear: t    batch-trace: t
+//    activation-trace: t
+    ans: 0.4    ga: 0.75	 //spreading activation from goal to chunks in general    imaginal-activation: 0.3    lf: 0.15    rt: -0    alpha: 0.2
+}
+
+
+define init-script {
+	nontargets = ["longline"]	
+	targets = ["shortline"]						
+}
+
+define script { //120 trials, 10% targets
+
+	stimuli = ["longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline"]
+
+	stimuli = shuffle(stimuli)
+
+	trialNr = 1
+        starttime = time() //check current time
+	
+	for i in stimuli {
+	
+		// Trial Start
+                set-data-file-field(0, trialNr)
+                set-data-file-field(1, i)
+
+                trial-start()
+                print("Trial:", trialNr)
+		//print(" start of trial time ", time())
+
+                stimulustime = starttime + 0.15 //0.15s stimulus presentation time
+		randomInterval = (random(100)*0.01)*(0.6)+1.55 // random interval ranges between 1.55 and 2.15
+                masktime = stimulustime + randomInterval //mask displayed for 1.85s
+		print(" random interval ", randomInterval)		
+
+                screen("breath", "stimulus", i, "not done") //stimulus of index i is put on screen as well as the breath
+		print(" displaying stimulus ", time())
+
+		done = 0 // variable for storing if one is done for the current trial
+
+		while (time() < stimulustime) {
+
+                        // stimulus presentation
+
+                        run-absolute-time-or-action(stimulustime, "action") //run until stimulus is replaced with mask or until press/nopress action
+
+                        acStim = last-action()
+
+			if (acStim[0] == "action") {
+                		print(" acStim = ", acStim[1])
+
+                                if (acStim[1] == "press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time())
+                                		print("press correct reward")
+                                	}
+                            	}
+
+                                if (acStim[1] == "just-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+					//nothing for the moment being
+                                	}
+                            	}
+
+                                if (acStim[1] == "missed-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+						// nothing
+                                	}
+                            	}
+
+                            	if (acStim[1] == "nopress") { // if there was an intentional inhibitition
+                                	
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+					if (i == "longline") { // if the stimulus was indeed not a target
+                                    		issue-reward(4, time())
+                                		print("no press correct reward")
+                                	}
+                            	}
+
+                            	if (acStim[1] == "just-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                    	issue-reward(4, time())
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+						// nothing
+                                	}
+                            	}
+
+                            	if (acStim[1] == "missed-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+					//nothing for the moment being
+                                	}
+                            	}
+
+                		//print(" stimulus model continued")
+                		//print(" time after last operator fired ", time())
+			}
+		}
+		//print(" end of stimulus model time ", time())
+
+
+		//Mask
+		if (done == 0) {
+                	screen("breath", "mask", i, "not done") //mask of index i is put on screen as well as the breath
+		}
+
+		if (done == 1) {
+                	screen("breath", "mask", i, "done") //mask of index i is put on screen as well as the breath
+		}
+		
+		print(" displaying mask ", time())
+		
+		//print("time",time())
+		//print("masktime", masktime)
+
+		while (time() < masktime) {
+
+                        // mask presentation
+
+                        run-absolute-time-or-action(masktime, "action") //run until mask is replaced with stimulus or until press/nopress action
+
+                        acMask = last-action()
+
+			if (acMask[0] == "action") {
+                		print(" acMask = ", acMask[1])
+
+                                if (acMask[1] == "press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time())
+                                		print("press correct reward")
+
+                                	}
+                            	}
+
+                                if (acMask[1] == "just-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+					//nothing for the moment being
+                                	}
+                            	}
+
+                                if (acMask[1] == "missed-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+						// nothing
+                                	}
+                            	}
+
+                            	if (acMask[1] == "nopress") { // if there was an intentional inhibitition
+                                	
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+					if (i == "longline") { // if the stimulus was indeed not a target
+                                    		issue-reward(4, time())
+                                		print("no press correct reward")
+                                	}
+                            	}
+
+                            	if (acMask[1] == "just-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                    	issue-reward(4, time())
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+						// nothing
+                                	}
+                            	}
+
+                            	if (acMask[1] == "missed-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+					//nothing for the moment being
+                                	}
+                            	}
+
+                		//print(" mask model continued")
+                		//print(" time after last operator fired ", time())
+			}
+		}
+		//print(" end of mask model time ", time())
+
+                trialNr = trialNr + 1
+		print(" trial end ")
+
+		starttime = time() // set new starttime to end of mask presentation
+        	                 
+    	}
+}	
