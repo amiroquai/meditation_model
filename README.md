@@ -3,6 +3,8 @@ A Prims computational model of meditation and its transfer to a sustained attent
 
 This reposetory contains computational models of focused attention meditation and a sustained attention to response task (SART). They can be run in Prims (https://github.com/ntaatgen/ACTransfer), a general archictecture of human cognition. It is an extension/adaptation of ACT-R. The corresponding paper can be found here: https://pdfs.semanticscholar.org/870e/58eed0660de6ede3b635d833fc10949f1a48.pdf
 
+The .pdf files are diagrams of the models.
+
 There is a meditation model, simulating a simplified version of what possibly happens during focused attention meditation. Then there is multiple versions of the SART task model, which are needed to simulate transfer from the meditation task to the SART. The idea is to see what would happen if somone did the SART, then meditated for 18 hours and then did the SART again (and compare that to a control group).
 The ".prims" files are the models that are read into Prims to be simulated. The ".bprims" files are alse read into Prims and contain information about the sequence and number of repetitions of simulations.
 
