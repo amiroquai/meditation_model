@@ -1,0 +1,576 @@
+define task SARTtrain {
+	initial-goals: (Focus check-s-r missed)
+	goals: (Wander just-react)
+	task-constants: ()
+    imaginal-autoclear: t    batch-trace: t
+//    activation-trace: t
+    ans: 0.4    ga: 0.75	 //spreading activation from goal to chunks in general    imaginal-activation: 0.3    lf: 0.15    rt: -0    alpha: 0.2
+}
+
+
+define goal Focus {
+
+	operator check-task (activation=1) {
+		V2 <> stimulus
+		V4 = done
+		RT1 = nil
+	==>
+		check -> AC1
+		Memory -> RT1
+	}
+	
+	operator reinforce (activation=1) {
+		V2 <> stimulus
+		V4 = done
+		RT4 = check-s-r
+	==>
+		reinforce -> AC1
+		RT4 -> G2 // reinforce check-s-r goal or put it back in place if deleted
+		nil -> G5 // just-react slot
+	}
+}
+
+
+define goal Wander {
+
+    operator thought-pump (activation=1) {
+		RT1=nil
+	==>
+		pump->AC1
+		Memory->RT1
+    }
+
+    operator Imagine-memory (activation=1) {
+		RT2=Daydream
+        ==>
+		imagine->AC1
+		RT1->WM1
+		RT2->WM2
+		RT3->WM3
+		RT4->WM4
+		nil->G1 // Focus slot
+		Wander->G4
+		nil -> G2 // check-s-r slot
+		just-react -> G5
+    }
+
+    operator Imagine-semi (activation=0.5) {
+		RT2=Intention
+        ==>
+		imagine-semi->AC1
+		RT1->WM1
+		RT2->WM2
+		RT3->WM3
+		RT4->WM4
+		Wander->G4
+    }
+}
+
+
+define goal just-react {
+
+    operator just-no-press (activation=1) { // possibly make higher to reduce misses during mindwandering
+		V2=stimulus
+		V4<>done
+        ==>
+		action->AC1
+		just-no-press->AC2
+    }
+
+    operator just-press (activation=0.25) {
+		V2=stimulus
+		V4<>done
+        ==>
+		action->AC1
+		just-press->AC2
+    }
+
+}
+
+
+define goal check-s-r {
+
+	operator check-s-r (activation=1) {
+		V2 = stimulus
+		RT2 <> r-mapping
+		V4<>done
+	==>
+		s-r-mapping -> AC1
+		r-mapping -> RT2
+		V3 -> RT3 // the word itself
+	}
+	
+	operator press-response (activation=1) {
+		RT2 = r-mapping
+		RT4 = press
+	==>
+		action -> AC1
+		press -> AC2
+	}
+
+	operator no-press-response (activation=1) {
+		RT2 = r-mapping
+		RT4 = nopress
+	==>
+		action -> AC1
+		nopress -> AC2
+	}
+
+}
+
+
+define goal missed {
+
+	operator missed-no-press (activation=1) {
+		V2 = mask
+		V4<>done
+		RT2 <> r-mapping // not in the process of retrieving response
+	==>
+		action -> AC1
+		missed-no-press -> AC2
+		Focus -> G1
+		nil -> G4
+	}
+
+	operator missed-press (activation=0.5) {
+		V2 = mask
+		V4<>done
+		RT2 <> r-mapping // not in the process of retrieving response
+	==>
+		action -> AC1
+		missed-press -> AC2
+		Focus -> G1
+		nil -> G4
+	}
+}
+
+
+
+
+define facts {
+(chsr Memory Intention Task check-s-r :activation 3.0)
+(other missed missed missed :activation 1.0) // needs to be in here or else ‚inf‘ activations appear
+
+(rmp Association r-mapping longline nopress :activation 3.0)
+(rmnp Association r-mapping shortline press :activation 3.0)
+
+(m1 Memory Daydream Memory-1 approach :activation 3.282)
+(m2 Memory Daydream Memory-2 avoid :activation 3.004)
+(m3 Memory Daydream Memory-3 stay :activation 2.99)
+(m4 Memory Daydream Memory-4 avoid :activation 3.34)
+(m5 Memory Daydream Memory-5 approach :activation 2.898)
+(m6 Memory Daydream Memory-6 approach :activation 3)
+(m7 Memory Daydream Memory-7 approach :activation 3.184)
+(m8 Memory Daydream Memory-8 stay :activation 3.03)
+(m9 Memory Daydream Memory-9 approach :activation 3.28)
+(m10 Memory Daydream Memory-10 avoid :activation 3.206)
+(m11 Memory Daydream Memory-11 approach :activation 3.058)
+(m12 Memory Daydream Memory-12 approach :activation 2.844)
+(m13 Memory Daydream Memory-13 approach :activation 3.114)
+(m14 Memory Daydream Memory-14 stay :activation 2.724)
+(m15 Memory Daydream Memory-15 stay :activation 3.048)
+(m16 Memory Daydream Memory-16 approach :activation 3.162)
+(m17 Memory Daydream Memory-17 avoid :activation 3.042)
+(m18 Memory Daydream Memory-18 approach :activation 3.176)
+(m19 Memory Daydream Memory-19 stay :activation 3.408)
+(m20 Memory Daydream Memory-20 avoid :activation 3.184)
+(m21 Memory Daydream Memory-21 avoid :activation 3.054)
+(m22 Memory Daydream Memory-22 approach :activation 3.128)
+(m23 Memory Daydream Memory-23 approach :activation 3.086)
+(m24 Memory Daydream Memory-24 avoid :activation 2.738)
+(m25 Memory Daydream Memory-25 approach :activation 2.916)
+(m26 Memory Daydream Memory-26 approach :activation 3.244)
+(m27 Memory Daydream Memory-27 approach :activation 2.992)
+(m28 Memory Daydream Memory-28 avoid :activation 3.116)
+(m29 Memory Daydream Memory-29 avoid :activation 2.798)
+(m30 Memory Daydream Memory-30 approach :activation 3.012)
+}
+
+define sji {
+(m2 m1 1.102)(m1 m2 1.102)
+(m3 m1 2.4153)(m1 m3 2.4153)(m3 m2 1.0389)(m2 m3 1.0389)
+(m4 m1 1.4079)(m1 m4 1.4079)(m4 m2 2.3095)(m2 m4 2.3095)(m4 m3 1.2955)(m3 m4 1.2955)
+(m5 m1 2.2206)(m1 m5 2.2206)(m5 m2 1.03)(m2 m5 1.03)(m5 m3 1.9377)(m3 m5 1.9377)(m5 m4 1.398)(m4 m5 1.398)
+(m6 m1 1.5221)(m1 m6 1.5221)(m6 m2 0.007471)(m2 m6 0.007471)(m6 m3 1.6652)(m3 m6 1.6652)(m6 m4 0.26312)(m4 m6 0.26312)(m6 m5 1.233)(m5 m6 1.233)
+(m7 m1 1.9738)(m1 m7 1.9738)(m7 m2 0.70669)(m2 m7 0.70669)(m7 m3 1.7179)(m3 m7 1.7179)(m7 m4 1.0825)(m4 m7 1.0825)(m7 m5 2.3632)(m5 m7 2.3632)(m7 m6 1.2544)(m6 m7 1.2544)
+(m8 m1 1.9532)(m1 m8 1.9532)(m8 m2 0.77212)(m2 m8 0.77212)(m8 m3 2.2346)(m3 m8 2.2346)(m8 m4 0.96105)(m4 m8 0.96105)(m8 m5 1.4837)(m5 m8 1.4837)(m8 m6 1.8391)(m6 m8 1.8391)(m8 m7 1.3044)(m7 m8 1.3044)
+(m9 m1 1.5007)(m1 m9 1.5007)(m9 m2 0.18808)(m2 m9 0.18808)(m9 m3 1.2853)(m3 m9 1.2853)(m9 m4 0.56936)(m4 m9 0.56936)(m9 m5 1.8341)(m5 m9 1.8341)(m9 m6 1.1516)(m6 m9 1.1516)(m9 m7 2.1708)(m7 m9 2.1708)(m9 m8 0.93894)(m8 m9 0.93894)
+(m10 m1 1.9652)(m1 m10 1.9652)(m10 m2 1.814)(m2 m10 1.814)(m10 m3 1.8321)(m3 m10 1.8321)(m10 m4 2.1425)(m4 m10 2.1425)(m10 m5 1.8981)(m5 m10 1.8981)(m10 m6 0.8094)(m6 m10 0.8094)(m10 m7 1.5643)(m7 m10 1.5643)(m10 m8 1.4486)(m8 m10 1.4486)(m10 m9 1.0361)(m9 m10 1.0361)
+(m11 m1 2.3294)(m1 m11 2.3294)(m11 m2 0.73242)(m2 m11 0.73242)(m11 m3 2.2852)(m3 m11 2.2852)(m11 m4 1.0383)(m4 m11 1.0383)(m11 m5 2.071)(m5 m11 2.071)(m11 m6 1.8484)(m6 m11 1.8484)(m11 m7 1.9929)(m7 m11 1.9929)(m11 m8 1.9856)(m8 m11 1.9856)(m11 m9 1.6515)(m9 m11 1.6515)(m11 m10 1.5958)(m10 m11 1.5958)
+(m12 m1 2.2816)(m1 m12 2.2816)(m12 m2 0.68805)(m2 m12 0.68805)(m12 m3 2.2697)(m3 m12 2.2697)(m12 m4 0.98946)(m4 m12 0.98946)(m12 m5 2.0149)(m5 m12 2.0149)(m12 m6 1.9059)(m6 m12 1.9059)(m12 m7 1.9489)(m7 m12 1.9489)(m12 m8 2.0093)(m8 m12 2.0093)(m12 m9 1.6294)(m9 m12 1.6294)(m12 m10 1.5468)(m10 m12 1.5468)(m12 m11 2.6425)(m11 m12 2.6425)
+(m13 m1 1.8158)(m1 m13 1.8158)(m13 m2 0.23442)(m2 m13 0.23442)(m13 m3 1.8775)(m3 m13 1.8775)(m13 m4 0.52511)(m4 m13 0.52511)(m13 m5 1.5993)(m5 m13 1.5993)(m13 m6 2.3078)(m6 m13 2.3078)(m13 m7 1.6447)(m7 m13 1.6447)(m13 m8 1.8583)(m8 m13 1.8583)(m13 m9 1.5255)(m9 m13 1.5255)(m13 m10 1.0817)(m10 m13 1.0817)(m13 m11 2.1786)(m11 m13 2.1786)(m13 m12 2.2319)(m12 m13 2.2319)
+(m14 m1 1.8859)(m1 m14 1.8859)(m14 m2 1.073)(m2 m14 1.073)(m14 m3 2.1436)(m3 m14 2.1436)(m14 m4 1.2087)(m4 m14 1.2087)(m14 m5 1.4136)(m5 m14 1.4136)(m14 m6 1.4646)(m6 m14 1.4646)(m14 m7 1.1656)(m7 m14 1.1656)(m14 m8 2.3255)(m8 m14 2.3255)(m14 m9 0.73104)(m9 m14 0.73104)(m14 m10 1.6232)(m10 m14 1.6232)(m14 m11 1.7607)(m11 m14 1.7607)(m14 m12 1.7643)(m12 m14 1.7643)(m14 m13 1.5109)(m13 m14 1.5109)
+(m15 m1 2.1678)(m1 m15 2.1678)(m15 m2 1.5912)(m2 m15 1.5912)(m15 m3 2.1474)(m3 m15 2.1474)(m15 m4 1.8356)(m4 m15 1.8356)(m15 m5 1.8744)(m5 m15 1.8744)(m15 m6 1.1137)(m6 m15 1.1137)(m15 m7 1.5491)(m7 m15 1.5491)(m15 m8 1.8168)(m8 m15 1.8168)(m15 m9 1.0317)(m9 m15 1.0317)(m15 m10 2.3212)(m10 m15 2.3212)(m15 m11 1.8161)(m11 m15 1.8161)(m15 m12 1.7783)(m12 m15 1.7783)(m15 m13 1.3381)(m13 m15 1.3381)(m15 m14 1.9997)(m14 m15 1.9997)
+(m16 m1 2.0873)(m1 m16 2.0873)(m16 m2 1.1889)(m2 m16 1.1889)(m16 m3 1.8064)(m3 m16 1.8064)(m16 m4 1.5692)(m4 m16 1.5692)(m16 m5 2.4735)(m5 m16 2.4735)(m16 m6 1.0174)(m6 m16 1.0174)(m16 m7 2.2101)(m7 m16 2.2101)(m16 m8 1.3415)(m8 m16 1.3415)(m16 m9 1.6992)(m9 m16 1.6992)(m16 m10 2.0162)(m10 m16 2.0162)(m16 m11 1.8646)(m11 m16 1.8646)(m16 m12 1.8073)(m12 m16 1.8073)(m16 m13 1.3775)(m13 m16 1.3775)(m16 m14 1.327)(m14 m16 1.327)(m16 m15 1.8896)(m15 m16 1.8896)
+(m17 m1 1.3053)(m1 m17 1.3053)(m17 m2 1.9734)(m2 m17 1.9734)(m17 m3 1.1251)(m3 m17 1.1251)(m17 m4 2.2827)(m4 m17 2.2827)(m17 m5 1.4463)(m5 m17 1.4463)(m17 m6 0.12766)(m6 m17 0.12766)(m17 m7 1.1779)(m7 m17 1.1779)(m17 m8 0.72794)(m8 m17 0.72794)(m17 m9 0.70627)(m9 m17 0.70627)(m17 m10 1.9793)(m10 m17 1.9793)(m17 m11 0.95657)(m11 m17 0.95657)(m17 m12 0.90193)(m12 m17 0.90193)(m17 m13 0.4354)(m13 m17 0.4354)(m17 m14 0.919)(m14 m17 0.919)(m17 m15 1.605)(m15 m17 1.605)(m17 m16 1.6581)(m16 m17 1.6581)
+(m18 m1 2.1856)(m1 m18 2.1856)(m18 m2 1.2073)(m2 m18 1.2073)(m18 m3 1.9058)(m3 m18 1.9058)(m18 m4 1.5798)(m4 m18 1.5798)(m18 m5 2.5136)(m5 m18 2.5136)(m18 m6 1.0957)(m6 m18 1.0957)(m18 m7 2.1987)(m7 m18 2.1987)(m18 m8 1.4407)(m8 m18 1.4407)(m18 m9 1.6736)(m9 m18 1.6736)(m18 m10 2.061)(m10 m18 2.061)(m18 m11 1.9462)(m11 m18 1.9462)(m18 m12 1.8887)(m12 m18 1.8887)(m18 m13 1.4483)(m13 m18 1.4483)(m18 m14 1.4255)(m14 m18 1.4255)(m18 m15 1.9726)(m15 m18 1.9726)(m18 m16 2.6001)(m16 m18 2.6001)(m18 m17 1.6311)(m17 m18 1.6311)
+(m19 m1 2.3527)(m1 m19 2.3527)(m19 m2 1.3389)(m2 m19 1.3389)(m19 m3 2.1056)(m3 m19 2.1056)(m19 m4 1.6833)(m4 m19 1.6833)(m19 m5 2.343)(m5 m19 2.343)(m19 m6 1.1826)(m6 m19 1.1826)(m19 m7 2.0083)(m7 m19 2.0083)(m19 m8 1.645)(m8 m19 1.645)(m19 m9 1.4811)(m9 m19 1.4811)(m19 m10 2.2244)(m10 m19 2.2244)(m19 m11 2.0201)(m11 m19 2.0201)(m19 m12 1.9652)(m12 m19 1.9652)(m19 m13 1.4989)(m13 m19 1.4989)(m19 m14 1.6692)(m14 m19 1.6692)(m19 m15 2.2241)(m15 m19 2.2241)(m19 m16 2.3506)(m16 m19 2.3506)(m19 m17 1.6365)(m17 m19 1.6365)(m19 m18 2.443)(m18 m19 2.443)
+(m20 m1 1.4256)(m1 m20 1.4256)(m20 m2 2.2003)(m2 m20 2.2003)(m20 m3 1.4308)(m3 m20 1.4308)(m20 m4 2.1437)(m4 m20 2.1437)(m20 m5 1.2231)(m5 m20 1.2231)(m20 m6 0.42457)(m6 m20 0.42457)(m20 m7 0.88629)(m7 m20 0.88629)(m20 m8 1.2301)(m8 m20 1.2301)(m20 m9 0.35717)(m9 m20 0.35717)(m20 m10 2.0077)(m10 m20 2.0077)(m20 m11 1.0726)(m11 m20 1.0726)(m20 m12 1.0364)(m12 m20 1.0364)(m20 m13 0.60874)(m13 m20 0.60874)(m20 m14 1.5539)(m14 m20 1.5539)(m20 m15 1.9558)(m15 m20 1.9558)(m20 m16 1.3242)(m16 m20 1.3242)(m20 m17 1.7292)(m17 m20 1.7292)(m20 m18 1.3739)(m18 m20 1.3739)(m20 m19 1.573)(m19 m20 1.573)
+(m21 m1 1.607)(m1 m21 1.607)(m21 m2 1.4012)(m2 m21 1.4012)(m21 m3 1.7899)(m3 m21 1.7899)(m21 m4 1.4331)(m4 m21 1.4331)(m21 m5 1.1925)(m5 m21 1.1925)(m21 m6 0.98949)(m6 m21 0.98949)(m21 m7 0.89305)(m7 m21 0.89305)(m21 m8 1.8504)(m8 m21 1.8504)(m21 m9 0.40782)(m9 m21 0.40782)(m21 m10 1.6799)(m10 m21 1.6799)(m21 m11 1.3758)(m11 m21 1.3758)(m21 m12 1.3656)(m12 m21 1.3656)(m21 m13 1.0538)(m13 m21 1.0538)(m21 m14 2.2249)(m14 m21 2.2249)(m21 m15 1.9775)(m15 m21 1.9775)(m21 m16 1.1734)(m16 m21 1.1734)(m21 m17 1.0704)(m17 m21 1.0704)(m21 m18 1.2618)(m18 m21 1.2618)(m21 m19 1.5186)(m19 m21 1.5186)(m21 m20 1.9008)(m20 m21 1.9008)
+(m22 m1 1.4288)(m1 m22 1.4288)(m22 m2 0.090168)(m2 m22 0.090168)(m22 m3 1.657)(m3 m22 1.657)(m22 m4 0.28939)(m4 m22 0.28939)(m22 m5 1.036)(m5 m22 1.036)(m22 m6 2.2453)(m6 m22 2.2453)(m22 m7 0.97474)(m7 m22 0.97474)(m22 m8 2.018)(m8 m22 2.018)(m22 m9 0.77634)(m9 m22 0.77634)(m22 m10 0.79991)(m10 m22 0.79991)(m22 m11 1.6594)(m11 m22 1.6594)(m22 m12 1.7121)(m12 m22 1.7121)(m22 m13 1.9452)(m13 m22 1.9452)(m22 m14 1.6808)(m14 m22 1.6808)(m22 m15 1.1526)(m15 m22 1.1526)(m22 m16 0.84456)(m16 m22 0.84456)(m22 m17 0.084872)(m17 m22 0.084872)(m22 m18 0.93558)(m18 m22 0.93558)(m22 m19 1.0837)(m19 m22 1.0837)(m22 m20 0.55039)(m20 m22 0.55039)(m22 m21 1.2262)(m21 m22 1.2262)
+(m23 m1 1.5888)(m1 m23 1.5888)(m23 m2 0)(m2 m23 0)(m23 m3 1.639)(m3 m23 1.639)(m23 m4 0.29668)(m4 m23 0.29668)(m23 m5 1.4198)(m5 m23 1.4198)(m23 m6 2.3192)(m6 m23 2.3192)(m23 m7 1.517)(m7 m23 1.517)(m23 m8 1.6469)(m8 m23 1.6469)(m23 m9 1.5004)(m9 m23 1.5004)(m23 m10 0.85402)(m10 m23 0.85402)(m23 m11 1.9574)(m11 m23 1.9574)(m23 m12 2.0072)(m12 m23 2.0072)(m23 m13 2.4615)(m13 m23 2.4615)(m23 m14 1.2884)(m14 m23 1.2884)(m23 m15 1.1014)(m15 m23 1.1014)(m23 m16 1.1941)(m16 m23 1.1941)(m23 m17 0.22253)(m17 m23 0.22253)(m23 m18 1.2569)(m18 m23 1.2569)(m23 m19 1.2839)(m19 m23 1.2839)(m23 m20 0.37046)(m20 m23 0.37046)(m23 m21 0.82525)(m21 m23 0.82525)(m23 m22 1.8749)(m22 m23 1.8749)
+(m24 m1 1.6058)(m1 m24 1.6058)(m24 m2 1.2688)(m2 m24 1.2688)(m24 m3 1.8163)(m3 m24 1.8163)(m24 m4 1.3123)(m4 m24 1.3123)(m24 m5 1.1685)(m5 m24 1.1685)(m24 m6 1.0833)(m6 m24 1.0833)(m24 m7 0.88245)(m7 m24 0.88245)(m24 m8 1.9411)(m8 m24 1.9411)(m24 m9 0.41217)(m9 m24 0.41217)(m24 m10 1.593)(m10 m24 1.593)(m24 m11 1.4082)(m11 m24 1.4082)(m24 m12 1.4036)(m12 m24 1.4036)(m24 m13 1.1223)(m13 m24 1.1223)(m24 m14 2.3104)(m14 m24 2.3104)(m24 m15 1.9176)(m15 m24 1.9176)(m24 m16 1.1305)(m16 m24 1.1305)(m24 m17 0.95929)(m17 m24 0.95929)(m24 m18 1.2225)(m18 m24 1.2225)(m24 m19 1.4792)(m19 m24 1.4792)(m24 m20 1.7684)(m20 m24 1.7684)(m24 m21 2.5659)(m21 m24 2.5659)(m24 m22 1.3407)(m22 m24 1.3407)(m24 m23 0.89884)(m23 m24 0.89884)
+(m25 m1 2.0301)(m1 m25 2.0301)(m25 m2 0.96788)(m2 m25 0.96788)(m25 m3 1.7473)(m3 m25 1.7473)(m25 m4 1.349)(m4 m25 1.349)(m25 m5 2.5095)(m5 m25 2.5095)(m25 m6 1.0906)(m6 m25 1.0906)(m25 m7 2.4201)(m7 m25 2.4201)(m25 m8 1.2948)(m8 m25 1.2948)(m25 m9 1.9201)(m9 m25 1.9201)(m25 m10 1.8016)(m10 m25 1.8016)(m25 m11 1.9074)(m11 m25 1.9074)(m25 m12 1.8535)(m12 m25 1.8535)(m25 m13 1.469)(m13 m25 1.469)(m25 m14 1.2251)(m14 m25 1.2251)(m25 m15 1.718)(m15 m25 1.718)(m25 m16 2.4789)(m16 m25 2.4789)(m25 m17 1.4577)(m17 m25 1.4577)(m25 m18 2.4357)(m18 m25 2.4357)(m25 m19 2.1939)(m19 m25 2.1939)(m25 m20 1.1117)(m20 m25 1.1117)(m25 m21 1.0193)(m21 m25 1.0193)(m25 m22 0.86703)(m22 m25 0.86703)(m25 m23 1.3093)(m23 m25 1.3093)(m25 m24 0.98947)(m24 m25 0.98947)
+(m26 m1 1.9592)(m1 m26 1.9592)(m26 m2 1.0004)(m2 m26 1.0004)(m26 m3 1.6748)(m3 m26 1.6748)(m26 m4 1.3859)(m4 m26 1.3859)(m26 m5 2.4327)(m5 m26 2.4327)(m26 m6 0.99604)(m6 m26 0.99604)(m26 m7 2.3474)(m7 m26 2.3474)(m26 m8 1.2176)(m8 m26 1.2176)(m26 m9 1.8786)(m9 m26 1.8786)(m26 m10 1.8094)(m10 m26 1.8094)(m26 m11 1.8161)(m11 m26 1.8161)(m26 m12 1.7616)(m12 m26 1.7616)(m26 m13 1.3742)(m13 m26 1.3742)(m26 m14 1.1639)(m14 m26 1.1639)(m26 m15 1.6894)(m15 m26 1.6894)(m26 m16 2.4911)(m16 m26 2.4911)(m26 m17 1.5199)(m17 m26 1.5199)(m26 m18 2.4167)(m18 m26 2.4167)(m26 m19 2.1611)(m19 m26 2.1611)(m26 m20 1.1171)(m20 m26 1.1171)(m26 m21 0.97982)(m21 m26 0.97982)(m26 m22 0.7764)(m22 m26 0.7764)(m26 m23 1.2153)(m23 m26 1.2153)(m26 m24 0.94358)(m24 m26 0.94358)(m26 m25 2.6052)(m25 m26 2.6052)
+(m27 m1 1.8957)(m1 m27 1.8957)(m27 m2 0.74531)(m2 m27 0.74531)(m27 m3 1.6262)(m3 m27 1.6262)(m27 m4 1.128)(m4 m27 1.128)(m27 m5 2.3427)(m5 m27 2.3427)(m27 m6 1.1158)(m6 m27 1.1158)(m27 m7 2.5607)(m7 m27 2.5607)(m27 m8 1.1971)(m8 m27 1.1971)(m27 m9 2.1409)(m9 m27 2.1409)(m27 m10 1.5789)(m10 m27 1.5789)(m27 m11 1.8697)(m11 m27 1.8697)(m27 m12 1.823)(m12 m27 1.823)(m27 m13 1.5058)(m13 m27 1.5058)(m27 m14 1.0817)(m14 m27 1.0817)(m27 m15 1.5181)(m15 m27 1.5181)(m27 m16 2.2554)(m16 m27 2.2554)(m27 m17 1.256)(m17 m27 1.256)(m27 m18 2.2166)(m18 m27 2.2166)(m27 m19 1.9909)(m19 m27 1.9909)(m27 m20 0.89053)(m20 m27 0.89053)(m27 m21 0.83737)(m21 m27 0.83737)(m27 m22 0.84264)(m22 m27 0.84264)(m27 m23 1.3784)(m23 m27 1.3784)(m27 m24 0.81769)(m24 m27 0.81769)(m27 m25 2.476)(m25 m27 2.476)(m27 m26 2.4356)(m26 m27 2.4356)
+(m28 m1 1.7089)(m1 m28 1.7089)(m28 m2 2.0165)(m2 m28 2.0165)(m28 m3 1.7002)(m3 m28 1.7002)(m28 m4 2.1407)(m4 m28 2.1407)(m28 m5 1.4955)(m5 m28 1.4955)(m28 m6 0.67972)(m6 m28 0.67972)(m28 m7 1.1589)(m7 m28 1.1589)(m28 m8 1.4555)(m8 m28 1.4555)(m28 m9 0.63062)(m9 m28 0.63062)(m28 m10 2.2514)(m10 m28 2.2514)(m28 m11 1.3533)(m11 m28 1.3533)(m28 m12 1.3158)(m12 m28 1.3158)(m28 m13 0.88109)(m13 m28 0.88109)(m28 m14 1.7447)(m14 m28 1.7447)(m28 m15 2.2372)(m15 m28 2.2372)(m28 m16 1.5802)(m16 m28 1.5802)(m28 m17 1.7765)(m17 m28 1.7765)(m28 m18 1.6379)(m18 m28 1.6379)(m28 m19 1.8492)(m19 m28 1.8492)(m28 m20 2.416)(m20 m28 2.416)(m28 m21 1.9895)(m21 m28 1.9895)(m28 m22 0.77364)(m22 m28 0.77364)(m28 m23 0.64341)(m23 m28 0.64341)(m28 m24 1.8711)(m24 m28 1.8711)(m28 m25 1.3738)(m25 m28 1.3738)(m28 m26 1.3715)(m26 m28 1.3715)(m28 m27 1.1556)(m27 m28 1.1556)
+(m29 m1 1.7713)(m1 m29 1.7713)(m29 m2 1.9751)(m2 m29 1.9751)(m29 m3 1.6356)(m3 m29 1.6356)(m29 m4 2.3307)(m4 m29 2.3307)(m29 m5 1.7549)(m5 m29 1.7549)(m29 m6 0.61208)(m6 m29 0.61208)(m29 m7 1.4303)(m7 m29 1.4303)(m29 m8 1.2621)(m8 m29 1.2621)(m29 m9 0.90845)(m9 m29 0.90845)(m29 m10 2.5026)(m10 m29 2.5026)(m29 m11 1.4035)(m11 m29 1.4035)(m29 m12 1.3535)(m12 m29 1.3535)(m29 m13 0.88716)(m13 m29 0.88716)(m29 m14 1.4598)(m14 m29 1.4598)(m29 m15 2.1438)(m15 m29 2.1438)(m29 m16 1.9072)(m16 m29 1.9072)(m29 m17 2.1587)(m17 m29 2.1587)(m29 m18 1.9315)(m18 m29 1.9315)(m29 m19 2.0522)(m19 m29 2.0522)(m29 m20 2.0631)(m20 m29 2.0631)(m29 m21 1.5763)(m21 m29 1.5763)(m29 m22 0.60694)(m22 m29 0.60694)(m29 m23 0.66102)(m23 m29 0.66102)(m29 m24 1.4755)(m24 m29 1.4755)(m29 m25 1.6864)(m25 m29 1.6864)(m29 m26 1.7105)(m26 m29 1.7105)(m29 m27 1.4626)(m27 m29 1.4626)(m29 m28 2.2401)(m28 m29 2.2401)
+(m30 m1 1.9555)(m1 m30 1.9555)(m30 m2 1.0366)(m2 m30 1.0366)(m30 m3 1.6708)(m3 m30 1.6708)(m30 m4 1.4228)(m4 m30 1.4228)(m30 m5 2.4206)(m5 m30 2.4206)(m30 m6 0.97066)(m6 m30 0.97066)(m30 m7 2.3084)(m7 m30 2.3084)(m30 m8 1.211)(m8 m30 1.211)(m30 m9 1.8399)(m9 m30 1.8399)(m30 m10 1.839)(m10 m30 1.839)(m30 m11 1.7965)(m11 m30 1.7965)(m30 m12 1.7414)(m12 m30 1.7414)(m30 m13 1.3467)(m13 m30 1.3467)(m30 m14 1.1672)(m14 m30 1.1672)(m30 m15 1.7068)(m15 m30 1.7068)(m30 m16 2.5152)(m16 m30 2.5152)(m30 m17 1.5597)(m17 m30 1.5597)(m30 m18 2.4317)(m18 m30 2.4317)(m30 m19 2.1747)(m19 m30 2.1747)(m30 m20 1.1467)(m20 m30 1.1467)(m30 m21 0.99367)(m21 m30 0.99367)(m30 m22 0.75836)(m22 m30 0.75836)(m30 m23 1.1845)(m23 m30 1.1845)(m30 m24 0.95461)(m24 m30 0.95461)(m30 m25 2.5746)(m25 m30 2.5746)(m30 m26 2.6601)(m26 m30 2.6601)(m30 m27 2.396)(m27 m30 2.396)(m30 m28 1.3987)(m28 m30 1.3987)(m30 m29 1.7446)(m29 m30 1.7446)
+
+(chsr m1 2.3951)(m1 chsr 2.3951)(chsr m2 1.4019)(m2 chsr 1.4019)(chsr m3 2.2883)(m3 chsr 2.2883)(chsr m4 1.6912)(m4 chsr 1.6912)(chsr m5 2.0905)(m5 chsr 2.0905)(chsr m6 1.2691)(m6 chsr 1.2691)(chsr m7 1.7754)(m7 chsr 1.7754)(chsr m8 1.8676)(m8 chsr 1.8676)(chsr m9 1.2639)(m9 chsr 1.2639)(chsr m10 2.2399)(m10 chsr 2.2399)(chsr m11 2.0296)(m11 chsr 2.0296)(chsr m12 1.9861)(m12 chsr 1.9861)(chsr m13 1.5294)(m13 chsr 1.5294)(chsr m14 1.9453)(m14 chsr 1.9453)(chsr m15 2.4627)(m15 chsr 2.4627)(chsr m16 2.0642)(m16 chsr 2.0642)(chsr m17 1.5366)(m17 chsr 1.5366)(chsr m18 2.1576)(m18 chsr 2.1576)(chsr m19 2.4135)(m19 chsr 2.4135)(chsr m20 1.7283)(m20 chsr 1.7283)(chsr m21 1.7989)(m21 chsr 1.7989)(chsr m22 1.2473)(m22 chsr 1.2473)(chsr m23 1.2969)(m23 chsr 1.2969)(chsr m24 1.7647)(m24 chsr 1.7647)(chsr m25 1.9204)(m25 chsr 1.9204)(chsr m26 1.8786)(m26 chsr 1.8786)(chsr m27 1.7335)(m27 chsr 1.7335)(chsr m28 2.0122)(m28 chsr 2.0122)(chsr m29 2.0426)(m29 chsr 2.0426)(chsr m30 1.8899)(m30 chsr 1.8899)
+
+(check-task chsr 12)
+}
+
+
+
+define action action {
+	latency: 0.1
+    noise: 0.01
+    distribution: uniform
+//	output: Pressing
+}
+
+define action press {
+	latency: 0.0
+    noise: 0.00
+    distribution: uniform
+//	output: Pressing
+}
+
+define action nopress {
+	latency: 0.0
+    distribution: uniform
+//	output: Not-Pressing
+}
+
+define action check {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action check-s-r {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action pump {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action imagine {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action just-no-press {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action just-press {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action s-r-mapping {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action missed-press {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+define action missed-no-press {
+	latency: 0.0
+    noise: 0.0
+    distribution: uniform
+}
+
+
+define script { //120 trials, 10% targets
+
+	stimuli = ["longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "longline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline", "shortline"]
+
+	stimuli = shuffle(stimuli)
+
+	trialNr = 1
+        starttime = time() //check current time
+	
+	for i in stimuli {
+	
+		// Trial Start
+                set-data-file-field(0, trialNr)
+                set-data-file-field(1, i)
+
+                trial-start()
+                print("Trial:", trialNr)
+		//print(" start of trial time ", time())
+
+                stimulustime = starttime + 0.15 //0.15s stimulus presentation time
+		randomInterval = (random(100)*0.01)*(6)+1.55 // random interval ranges between 1.55 and 2.15
+                masktime = stimulustime + randomInterval //mask displayed for 1.85s
+		print(" random interval ", randomInterval)
+
+                screen("breath", "stimulus", i, "not done") //stimulus of index i is put on screen as well as the breath
+		print(" displaying stimulus ", time())
+
+		done = 0 // variable for storing if one is done for the current trial
+
+		while (time() < stimulustime) {
+
+                        // stimulus presentation
+
+                        run-absolute-time-or-action(stimulustime, "action") //run until stimulus is replaced with mask or until press/nopress action
+
+                        acStim = last-action()
+
+			if (acStim[0] == "action") {
+                		print(" acStim = ", acStim[1])
+
+                                if (acStim[1] == "press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time(), time())
+                                		print("press correct reward")
+                                	}
+                            	}
+
+                                if (acStim[1] == "just-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time(), time())
+                                		print("press correct reward")
+                                	}
+
+                                	if (i == "longline") { // if the stimulus was indeed a target
+                                    		issue-reward(0, time())
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                                if (acStim[1] == "missed-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(4, time(), time())
+                                		print("press correct reward")
+                                	}
+
+                                	if (i == "longline") { // if the stimulus was indeed a target
+                                    		issue-reward(0, time())
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                            	if (acStim[1] == "nopress") { // if there was an intentional inhibitition
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                    		issue-reward(4, time(), time())
+                                		print("no press correct reward")
+                                	}
+                            	}
+
+                            	if (acStim[1] == "just-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                   		issue-reward(4, time())
+                                		print("just no press correct reward")
+                                	}
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(0)
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                            	if (acStim[1] == "missed-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "stimulus", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                   		issue-reward(4, time())
+                                		print("missed-no-press correct reward")
+                                	}
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(0)
+                                		print("press wrong punishement")
+					}
+                            	}
+
+                		//print(" stimulus model continued")
+                		//print(" time after last operator fired ", time())
+			}
+		}
+		//print(" end of stimulus model time ", time())
+
+
+		//Mask
+		if (done == 0) {
+                	screen("breath", "mask", i, "not done") //mask of index i is put on screen as well as the breath
+		}
+
+		if (done == 1) {
+                	screen("breath", "mask", i, "done") //mask of index i is put on screen as well as the breath
+		}
+		
+		print(" displaying mask ", time())
+		
+		//print("time",time())
+		//print("masktime", masktime)
+
+		while (time() < masktime) {
+
+                        // mask presentation
+
+                        run-absolute-time-or-action(masktime, "action") //run until mask is replaced with stimulus or until press/nopress action
+
+                        acMask = last-action()
+
+			if (acMask[0] == "action") {
+                		print(" acMask = ", acMask[1])
+
+                                if (acMask[1] == "press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time())
+                                		print("press correct reward")
+                                	}
+                            	}
+
+                                if (acMask[1] == "just-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(8, time())
+                                		print("press correct reward")
+                                	}
+
+                                	if (i == "longline") { // if the mask was indeed a target
+                                    		issue-reward(0, time())
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                                if (acMask[1] == "missed-press") { // if there was a press
+                                	cur = time()
+                                	RT = cur - starttime // calculate reaction time
+                                	set-data-file-field(4, RT) // put in dat file
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(4, time())
+                                		print("press correct reward")
+                                	}
+
+                                	if (i == "longline") { // if the mask was indeed a target
+                                    		issue-reward(0, time())
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                            	if (acMask[1] == "nopress") { // if there was an intentional inhibitition
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                    		issue-reward(4, time())
+                                		print("no press correct reward")
+                                	}
+                            	}
+
+                            	if (acMask[1] == "just-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                   		issue-reward(4, time())
+                                		print("just no press correct reward")
+                                	}
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(0)
+                                		print("press wrong punishement")
+                                	}
+                            	}
+
+                            	if (acMask[1] == "missed-no-press") { // if there was habitual inhibition
+
+                			screen("breath", "mask", i, "done")
+					done = 1
+
+                                	if (i == "longline") { // if the stimulus was indeed not a target
+                                   		issue-reward(4, time())
+                                		print("missed-no-press correct reward")
+                                	}
+
+                                	if (i == "shortline") { // if the stimulus was indeed a target
+                                    		issue-reward(0)
+                                		print("press wrong punishement")
+					}
+                            	}
+
+                		//print(" mask model continued")
+                		//print(" time after last operator fired ", time())
+			}
+		}
+		//print(" end of mask model time ", time())
+
+                trialNr = trialNr + 1
+		print(" trial end ")
+
+		starttime = time() // set new starttime to end of mask presentation
+        	                 
+    	}
+}	

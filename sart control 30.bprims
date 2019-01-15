@@ -1,0 +1,5 @@
+repeat 30
+reset
+run SARTtrain training 1
+run SARTlater test 1
+reset
